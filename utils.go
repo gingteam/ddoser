@@ -65,6 +65,7 @@ func handle(host, port, method, path, useragent, proxy string, n int) {
 	h.SetMethod(method)
 	h.SetHost(host)
 	h.SetUserAgent(useragent)
+	h.Set("Connection", "keep-alive")
 	header := []byte(h.String())
 
 	// Dialer
