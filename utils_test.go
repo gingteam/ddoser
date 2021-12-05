@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/valyala/fasthttp"
+)
 
 func TestRandom(t *testing.T) {
 	seeds := []string{"a", "b", "c"}
@@ -19,4 +23,11 @@ func TestUserAgent(t *testing.T) {
 
 func TestRandomParam(t *testing.T) {
 	t.Log(randomParam())
+}
+
+func TestFastHttp(t *testing.T) {
+	var h fasthttp.RequestHeader
+	h.SetHost("www.google.com")
+	h.SetMethod("GET")
+	t.Log(h.String())
 }

