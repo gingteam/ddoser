@@ -13,14 +13,11 @@ jobs:
           lfs: true
           fetch-depth: 0
       - name: "Build release"
-        run: |
-          go mod tidy
-          go build
+        run: make build
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
           prerelease: true
           title: "Development Build"
-          files: |
-            ddoser
+          files: ddoser
