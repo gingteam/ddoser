@@ -16,7 +16,3 @@ func TestUserAgent(t *testing.T) {
 
 	t.Log(ua[0])
 }
-
-func TestRandomParam(t *testing.T) {
-	t.Log(randomParam())
-}

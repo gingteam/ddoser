@@ -22,7 +22,8 @@ ulimit -n 999999
 
 ### Usage:
 ```bash
-./ddoser run -h
+./ddoser download
+./ddoser run --url=http://example.com:80 --workers=10000 --duration=10
 ```
 
 ### Warning !!!

