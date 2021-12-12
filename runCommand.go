@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/mkideal/cli"
@@ -26,16 +25,11 @@ var attackCommand = &cli.Command{
 		argv := ctx.Argv().(*runT)
 		useragents := getUserAgents(500)
 		proxies := readLines(argv.File)
-		u, err := url.ParseRequestURI(argv.Url)
-
-		if err != nil {
-			return err
-		}
 
 		fmt.Println("[+] Starting attack...")
 
 		for i := 0; i < argv.Worker; i++ {
-			go worker(u, useragents, proxies)
+			go worker(argv.Url, useragents, proxies)
 		}
 
 		time.Sleep(time.Duration(argv.Duration) * time.Second)
