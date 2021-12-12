@@ -26,7 +26,7 @@ var attackCommand = &cli.Command{
 		argv := ctx.Argv().(*runT)
 		useragents := getUserAgents(500)
 		proxies := readLines(argv.File)
-		u, err := url.Parse(argv.Url)
+		u, err := url.ParseRequestURI(argv.Url)
 
 		if err != nil {
 			return err
