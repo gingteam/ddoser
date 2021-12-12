@@ -27,9 +27,9 @@ ulimit -n 999999
 ```
 
 ### Warning !!!
-I will not be responsible if you use the go-ddoser tool for the following purposes:
+I will not be responsible if you use the ddoser tool for the following purposes:
 
-Using the go-ddoser tool to perform acts that violate the laws of the current Socialist Republic of Vietnam and international regulations being applied in Vietnam.
+Using the ddoser tool to perform acts that violate the laws of the current Socialist Republic of Vietnam and international regulations being applied in Vietnam.
 
 ```
 ⢸⣿⣿⣿⣿⠃⠄⢀⣴⡾⠃⠄⠄⠄⠄⠄⠈⠺⠟⠛⠛⠛⠛⠻⢿⣿⣿⣿⣿⣶⣤⡀⠄
