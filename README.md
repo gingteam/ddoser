@@ -1,7 +1,9 @@
 <img src="https://i.imgur.com/WO9KjCX.png" align="right" width="120px">
 
 # ddoser
-Denial of Service Attacks Using Golang
+Denial of Service Attacks using Golang
+
+![](https://imgur.com/LR8sw9c.png)
 
 ### Usage
 ```bash
