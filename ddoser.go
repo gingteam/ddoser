@@ -74,7 +74,7 @@ func (d *Ddoser) Run() {
 		}()
 		fmt.Printf("\rWorker [%d] are ready", i+1)
 		os.Stdout.Sync()
-		time.Sleep(time.Millisecond * 5)
+		time.Sleep(time.Millisecond * 1)
 	}
 
 	fmt.Println()
