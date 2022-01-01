@@ -7,10 +7,8 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/gamexg/proxyclient v0.0.0-20210207161252-499908056324
-	github.com/labstack/gommon v0.3.1
-	github.com/mkideal/cli v0.2.7
 	github.com/shadowsocks/shadowsocks-go v0.0.0-20200409064450-3e585ff90601 // indirect
 	github.com/symfony-cli/console v1.0.0
-	github.com/symfony-cli/terminal v0.0.0-20211113151828-3b1d22f17f52
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	gopkg.in/bufio.v1 v1.0.0-20140618132640-567b2bfa514e // indirect
 )
