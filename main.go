@@ -7,18 +7,21 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/mkideal/cli"
+	"github.com/symfony-cli/console"
 )
 
-func main() {
+func init() {
 	rand.Seed(time.Now().UnixNano())
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	if err := cli.Root(
-		rootCommand,
-		cli.Tree(attackCommand),
-		cli.Tree(downloadCommand),
-	).Run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+}
+
+func main() {
+	app := &console.Application{
+		Name:      "DDoser CLI",
+		Usage:     "Denial of Service Attacks using Golang",
+		Copyright: fmt.Sprintf("(c) 2021-%d GingTeam", time.Now().Year()),
+		Version:   "2.0",
 	}
+
+	app.Run(os.Args)
 }
