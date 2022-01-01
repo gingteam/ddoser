@@ -11,5 +11,6 @@ require (
 	github.com/mkideal/cli v0.2.7
 	github.com/shadowsocks/shadowsocks-go v0.0.0-20200409064450-3e585ff90601 // indirect
 	github.com/symfony-cli/console v1.0.0
+	github.com/symfony-cli/terminal v0.0.0-20211113151828-3b1d22f17f52
 	gopkg.in/bufio.v1 v1.0.0-20140618132640-567b2bfa514e // indirect
 )

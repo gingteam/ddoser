@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"math/rand"
 	"os"
-	"os/exec"
 
 	browser "github.com/EDDYCJY/fake-useragent"
 )
@@ -34,8 +33,4 @@ func readLines(fileName string) []string {
 	}
 
 	return lines
-}
-
-func runCommand(command string) {
-	exec.Command("sh", "-c", command).Run()
 }

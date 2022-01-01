@@ -21,6 +21,9 @@ func main() {
 		Usage:     "Denial of Service Attacks using Golang",
 		Copyright: fmt.Sprintf("(c) 2021-%d GingTeam", time.Now().Year()),
 		Version:   "2.0",
+		Commands: []*console.Command{
+			runCommand,
+		},
 	}
 
 	app.Run(os.Args)
