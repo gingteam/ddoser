@@ -1,5 +1,5 @@
 build:
 	@go mod tidy
-	@go build
+	@go build -ldflags="-s -w"
 clean:
 	@rm -f ddoser
