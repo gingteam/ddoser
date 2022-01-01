@@ -22,7 +22,7 @@ var runCommand = &console.Command{
 		&console.StringFlag{
 			Name:         "file",
 			Aliases:      []string{"f"},
-			DefaultValue: "socks4.txt",
+			DefaultValue: "http.txt",
 		},
 		&console.DurationFlag{
 			Name:         "duration",
