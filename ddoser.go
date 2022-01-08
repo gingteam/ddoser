@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/url"
 	"time"
@@ -63,7 +64,7 @@ func (d *Ddoser) Run() {
 
 					if res.StatusCode() != 200 {
 						conn.Close()
-						return err
+						return fmt.Errorf("%d", res.StatusCode())
 					}
 
 					return nil
