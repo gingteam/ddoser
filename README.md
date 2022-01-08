@@ -3,8 +3,6 @@
 # ddoser
 Denial of Service Attacks using Golang
 
-![](https://imgur.com/LR8sw9c.png)
-
 ### Usage
 ```bash
 git clone https://github.com/gingteam/ddoser.git
@@ -25,7 +23,7 @@ ulimit -n 999999
 ### Usage:
 ```bash
 ./ddoser download
-./ddoser run --url=http://example.com:80 --workers=10000 --duration=10
+./ddoser run --url=http://example.com:80 -w 10000 -d 10s
 ```
 
 ### Warning !!!
