@@ -21,13 +21,18 @@ func randomString(length int) string {
 	return string(b)
 }
 
-func readLines(fileName string) []string {
+func readLineFromFile(fileName string) ([]string, error) {
 	var lines []string
-	openFile, _ := os.Open(fileName)
+	openFile, err := os.Open(fileName)
+
+	if err != nil {
+		return nil, err
+	}
+
 	scanner := bufio.NewScanner(openFile)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
 
-	return lines
+	return lines, nil
 }

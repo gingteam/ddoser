@@ -22,8 +22,8 @@ ulimit -n 999999
 
 ### Usage:
 ```bash
-./ddoser download
-./ddoser run --url=http://example.com:80 -w 10000 -d 10s
+wget https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt
+./ddoser run --url=http://example.com:80 -w 10000 -d 10s -f http.txt
 ```
 
 ### Warning !!!

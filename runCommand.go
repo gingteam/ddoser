@@ -42,11 +42,16 @@ var runCommand = &console.Command{
 		}
 
 		headers := make([]string, 100)
-		proxies := readLines(c.String("file"))
 		spinner := terminal.NewSpinner(c.App.Writer)
+		proxies, err := readLineFromFile(c.String("file"))
+
+		if err != nil {
+			return err
+		}
 
 		terminal.Println("<fg=yellow>Prepare for headers</>")
 
+		spinner.SuffixText = "Initialize random headers..."
 		spinner.Start()
 		var h fasthttp.RequestHeader
 		h.SetMethod("GET")
@@ -68,11 +73,14 @@ var runCommand = &console.Command{
 		}
 
 		terminal.Println("<fg=yellow>Starting attack...</>")
+		spinner.SuffixText = "Attacking..."
+		spinner.Start()
 
 		ddoser.Run()
 
 		time.Sleep(c.Duration("duration"))
 
+		spinner.Stop()
 		terminal.Println("<fg=green>Attack finished</>")
 
 		return nil
