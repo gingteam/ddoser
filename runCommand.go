@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
@@ -37,8 +36,8 @@ var runCommand = &console.Command{
 	Action: func(c *console.Context) error {
 		u, err := url.ParseRequestURI(c.String("url"))
 
-		if err != nil || u.Hostname() == "" || u.Port() == "" {
-			return fmt.Errorf("invalid URL")
+		if err != nil {
+			return err
 		}
 
 		headers := make([]string, 100)

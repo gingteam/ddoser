@@ -19,6 +19,10 @@ type Ddoser struct {
 }
 
 func NewDdoser(u *url.URL, number int, headers, proxies []string) (*Ddoser, error) {
+	if u.Hostname() == "" || u.Port() == "" {
+		return nil, fmt.Errorf("missing Hostname or Port")
+	}
+
 	return &Ddoser{
 		url:        u,
 		numWorkers: number,
